@@ -1,12 +1,11 @@
 package com.example.learn_androidstudio
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,18 +13,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.learn_androidstudio.ui.theme.Learn_androidstudioTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var etInputText: EditText
+    private lateinit var btnOpenSecondActivity: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Learn_androidstudioTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+        setContentView(R.layout.activity_main)
+
+        etInputText = findViewById(R.id.etInputText)
+        btnOpenSecondActivity = findViewById(R.id.btnOpenSecondActivity)
+
+        btnOpenSecondActivity.setOnClickListener {
+            val text = etInputText.text.toString().trim()
+            if (validateInput(text)){
+                val intent = Intent(this, SecondActivity::class.java).apply {
+                    putExtra("EXTRA_TEXT", text)
                 }
+                startActivity(intent)
             }
+        }
+
+
+    }
+    private fun validateInput(text: String): Boolean {
+        return if (text.isEmpty()) {
+            etInputText.error = "Поле не должно быть пустым!"
+            Toast.makeText(this, "Заполните поле ввода", Toast.LENGTH_SHORT).show()
+            false
+        } else {
+            true
         }
     }
 }

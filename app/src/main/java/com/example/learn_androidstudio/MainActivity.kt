@@ -8,17 +8,14 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.learn_androidstudio.ui.theme.Learn_androidstudioTheme
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var etInputText: EditText
     private lateinit var btnOpenSecondActivity: Button
     private lateinit var btnCall: Button
+    private lateinit var btnShare: Button
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,18 +24,19 @@ class MainActivity : ComponentActivity() {
         etInputText = findViewById(R.id.etInputText)
         btnOpenSecondActivity = findViewById(R.id.btnOpenSecondActivity)
         btnCall = findViewById(R.id.btnCall)
+        btnShare = findViewById(R.id.btnShare)
 
-
+        // Явный Intent
         btnOpenSecondActivity.setOnClickListener {
             val text = etInputText.text.toString().trim()
-            if (validateInput(text)){
+            if (validateInput(text)) {
                 val intent = Intent(this, SecondActivity::class.java).apply {
                     putExtra("EXTRA_TEXT", text)
                 }
                 startActivity(intent)
             }
         }
-
+        //Неявный Intent
         btnCall.setOnClickListener {
             val phone = etInputText.text.toString().trim()
             if (validatePhoneNumber(phone)) {
@@ -48,10 +46,21 @@ class MainActivity : ComponentActivity() {
                 startActivity(intent)
             }
         }
-
-
-
+        //Системный Intent
+        btnShare.setOnClickListener {
+            val text = etInputText.text.toString().trim()
+            if (validateInput(text)) {
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, text)
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, "Поделиться через...")
+                startActivity(shareIntent)
+            }
+        }
     }
+
     private fun validateInput(text: String): Boolean {
         return if (text.isEmpty()) {
             etInputText.error = "Поле не должно быть пустым!"
@@ -69,32 +78,12 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this, "Поле телефона пустое", Toast.LENGTH_SHORT).show()
                 false
             }
-          !Patterns.PHONE.matcher(phone).matches() || phone.length < 3 -> {
-              etInputText.error = "Некорректный формат телефона!"
-              Toast.makeText(
-                  this,
-                  "Введите валидный номер (например, +79991112233)",
-                  Toast.LENGTH_LONG
-              ).show()
-              false
-          }
+            !Patterns.PHONE.matcher(phone).matches() || phone.length < 3 -> {
+                etInputText.error = "Некорректный формат телефона!"
+                Toast.makeText(this, "Введите валидный номер (например, +79991112233)", Toast.LENGTH_LONG).show()
+                false
+            }
             else -> true
-          }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Learn_androidstudioTheme {
-        Greeting("Android")
+        }
     }
 }

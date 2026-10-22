@@ -42,5 +42,33 @@ val mockAppList = listOf(
         description = "Карты, маршруты, пробки и поиск организаций.",
         category = "Навигация",
         iconRes = R.drawable.ic_yandexmaps
+    ),
+    AppItem(
+        id = 7,
+        name = "VK Видео",
+        description = "Смотри фильмы и шоу.",
+        category = "Видео",
+        R.drawable.ic_vkvideo
+    ),
+    AppItem(
+        id = 8,
+        name = "Почта Mail.ru",
+        description = "Удобная электронная почта.",
+        category = "Утилиты",
+        R.drawable.ic_mail
+    ),
+    AppItem(
+        id = 9,
+        name = "Дзен",
+        description = "Читай интересные статьи.",
+        category = "Новости",
+        R.drawable.ic_dzen
+    ),
+    AppItem(
+        id = 10,
+        name = "Telegram",
+        description = "Чаты, общение, каналы",
+        category = "Мессенджер",
+        R.drawable.ic_tg
     )
 )

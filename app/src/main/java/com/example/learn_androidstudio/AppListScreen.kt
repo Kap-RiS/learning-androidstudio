@@ -1,5 +1,6 @@
 package com.example.learn_androidstudio
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +16,10 @@ import androidx.compose.ui.unit.dp
 import com.example.learn_androidstudio.ui.theme.Learn_androidstudioTheme
 
 @Composable
-fun AppListScreen(apps: List<AppItem>) {
+fun AppListScreen(
+    apps: List<AppItem> = mockAppList,
+    onItemClick: (AppItem) -> Unit = {} // Передаем AppItem
+) {
     Scaffold(
         topBar = {
             AppToolbar()
@@ -29,8 +33,11 @@ fun AppListScreen(apps: List<AppItem>) {
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(apps) {app ->
-                AppItemCard(app = app)
+            items(apps) { app ->
+                AppItemCard(
+                    app = app,
+                    modifier = Modifier.clickable { onItemClick(app) } // Клик передает app
+                )
             }
         }
     }

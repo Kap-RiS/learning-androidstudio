@@ -1,4 +1,4 @@
-package com.example.learn_androidstudio
+package com.example.learn_androidstudio.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -25,7 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.learn_androidstudio.ui.theme.Learn_androidstudioTheme
+import com.example.learn_androidstudio.data.mockAppList
+import com.example.learn_androidstudio.domain.AppItem
+import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 
 // карточка одного приложения
 @Composable
@@ -39,7 +41,7 @@ fun AppItemCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // 👈 Полностью убирает тень/обводку
     ) {
         Row(
             modifier = Modifier
@@ -69,8 +71,8 @@ fun AppItemCard(
                     text = app.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    minLines = 2, // 👈 Гарантирует ровно 2 строки высоты
-                    maxLines = 2, // 👈 Ограничивает максимум 2 строками
+                    minLines = 2,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(6.dp))

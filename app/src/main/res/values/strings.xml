@@ -2,6 +2,10 @@
     <string name="app_name">Learn Android Studio</string>
     <string name="app_list_title">Каталог приложений</string>
 
+    <!-- Описания иконок и логирование -->
+    <string name="app_logo_desc">Логотип приложения</string>
+    <string name="snackbar_toolbar_clicked">Каталог приложений обновлён</string>
+
     <!-- Кнопки и иконки -->
     <string name="action_back">Назад</string>
     <string name="action_share">Поделиться</string>

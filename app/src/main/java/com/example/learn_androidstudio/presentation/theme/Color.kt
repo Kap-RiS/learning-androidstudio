@@ -1,4 +1,4 @@
-package com.example.learn_androidstudio.ui.theme
+package com.example.learn_androidstudio.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

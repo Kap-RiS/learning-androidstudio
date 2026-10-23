@@ -1,4 +1,7 @@
-package com.example.learn_androidstudio
+package com.example.learn_androidstudio.data
+
+import com.example.learn_androidstudio.R
+import com.example.learn_androidstudio.domain.AppItem
 
 val mockAppList = listOf(
     AppItem(

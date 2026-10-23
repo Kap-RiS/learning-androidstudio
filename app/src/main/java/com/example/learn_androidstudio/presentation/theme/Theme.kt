@@ -1,4 +1,4 @@
-package com.example.learn_androidstudio.ui.theme
+package com.example.learn_androidstudio.presentation.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -16,15 +16,17 @@ private val DarkColorScheme = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
     background = DarkBackground,
+    surface = DarkBackground,
+    surfaceTint = Color.Transparent
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = RuStoreBlue,
     secondary = PurpleGrey40,
     tertiary = Pink40,
-    background = LightBackground, // Белый фон
-    surface = Color(0xFFF5F6F8),   // Чистый светло-серый фон для карточек
-    surfaceTint = Color.Transparent // Отключаем розовый/фиолетовый оттенок от elevation в Material 3
+    background = LightBackground,               // Чистый белый фон (0xFFFFFFFF)
+    surface = LightBackground,                  // 👈 Карточки теперь БЕЛЫЕ и сливаются с фоном
+    surfaceTint = Color.Transparent             // Без розового/фиолетового налёта
 )
 
 @Composable

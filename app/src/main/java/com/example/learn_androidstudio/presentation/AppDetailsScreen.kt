@@ -1,4 +1,4 @@
-package com.example.learn_androidstudio
+package com.example.learn_androidstudio.presentation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -28,15 +28,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.learn_androidstudio.ui.theme.Learn_androidstudioTheme
+import com.example.learn_androidstudio.R
+import com.example.learn_androidstudio.data.mockAppList
+import com.example.learn_androidstudio.domain.AppItem
+import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 
 @Composable
 fun AppDetailScreen(
     app: AppItem = mockAppList.first(),
     onBackClick: () -> Unit = {},
-    onShowcaseItemClick: (AppItem) -> Unit = {}
+    onShowcaseItemClick: (AppItem) -> Unit = {},
+    onSimilarAppClick: (AppItem) -> Unit = {}
 ) {
-    // Исключаем текущее открытое приложение из других блоков
     val otherApps = mockAppList.filter { it.id != app.id }
 
     Scaffold(
@@ -166,8 +169,8 @@ fun AppDetailScreen(
 
             // ===== 4. БЛОК «ВАМ МОЖЕТ ПОНРАВИТЬСЯ» =====
             SimilarAppsBlock(
-                apps = otherApps.take(6), // Исключаем текущее приложение
-                onDownloadClick = { }
+                apps = otherApps.take(6),
+                onAppClick = onSimilarAppClick
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -190,7 +193,7 @@ fun AppDetailScreen(
                             .width(260.dp)
                             .height(145.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .background(MaterialTheme.colorScheme.background) // Из темы (белый)
                     ) {
                         Image(
                             painter = painterResource(id = app.iconRes),
@@ -223,7 +226,7 @@ fun AppDetailScreen(
 
             // ===== 7. БЛОК «ВИТРИНА» =====
             ShowcaseBlock(
-                showcaseApps = otherApps.take(9), // Ровно 9 элементов = 3 страницы по 3
+                showcaseApps = otherApps.take(9),
                 onItemClick = onShowcaseItemClick
             )
         }
@@ -233,7 +236,7 @@ fun AppDetailScreen(
 @Composable
 fun SimilarAppsBlock(
     apps: List<AppItem>,
-    onDownloadClick: (AppItem) -> Unit
+    onAppClick: (AppItem) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -248,7 +251,10 @@ fun SimilarAppsBlock(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(apps) { item ->
-                SimilarAppCard(app = item, onDownloadClick = { onDownloadClick(item) })
+                SimilarAppCard(
+                    app = item,
+                    onAppClick = { onAppClick(item) }
+                )
             }
         }
     }
@@ -257,10 +263,12 @@ fun SimilarAppsBlock(
 @Composable
 fun SimilarAppCard(
     app: AppItem,
-    onDownloadClick: () -> Unit
+    onAppClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier.width(110.dp),
+        modifier = Modifier
+            .width(110.dp)
+            .clickable { onAppClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -282,7 +290,7 @@ fun SimilarAppCard(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Button(
-            onClick = onDownloadClick,
+            onClick = onAppClick,
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -350,7 +358,8 @@ fun AppDetailScreenPreview() {
         AppDetailScreen(
             app = mockAppList.first(),
             onBackClick = {},
-            onShowcaseItemClick = {}
+            onShowcaseItemClick = {},
+            onSimilarAppClick = {}
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.learn_androidstudio
+package com.example.learn_androidstudio.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.learn_androidstudio.data.mockAppList
 
 object Screen {
     const val APP_LIST = "app_list"
@@ -20,7 +21,6 @@ fun AppNavigation() {
         navController = navController,
         startDestination = Screen.APP_LIST
     ) {
-        // Экран списка приложений
         composable(Screen.APP_LIST) {
             AppListScreen(
                 onItemClick = { clickedApp ->
@@ -29,7 +29,6 @@ fun AppNavigation() {
             )
         }
 
-        // Экран деталей конкретного приложения
         composable(
             route = "${Screen.APP_DETAIL}/{appId}",
             arguments = listOf(navArgument("appId") { type = NavType.IntType })
@@ -43,8 +42,10 @@ fun AppNavigation() {
                     navController.popBackStack()
                 },
                 onShowcaseItemClick = { showcaseApp ->
-                    // Переходим на детали выбранного в Витрине приложения
                     navController.navigate("${Screen.APP_DETAIL}/${showcaseApp.id}")
+                },
+                onSimilarAppClick = { similarApp ->
+                    navController.navigate("${Screen.APP_DETAIL}/${similarApp.id}")
                 }
             )
         }

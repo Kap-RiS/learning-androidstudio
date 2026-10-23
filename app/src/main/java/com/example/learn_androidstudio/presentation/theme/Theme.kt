@@ -1,6 +1,5 @@
-package com.example.learn_androidstudio.ui.theme
+package com.example.learn_androidstudio.presentation.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -13,25 +12,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
+    primary = RuStoreBlue,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    background = DarkBackground,
+    surface = DarkBackground,
+    surfaceTint = Color.Transparent
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = CoolBlue,
-    surface = CardWhite,
-    onPrimary = Color.White,
-    onSurface = Color(0xFF1A1A1A),
-    background = LightGrayBg
+    primary = RuStoreBlue,
+    secondary = PurpleGrey40,
+    tertiary = Pink40,
+    background = LightBackground,               // Чистый белый фон (0xFFFFFFFF)
+    surface = LightBackground,                  // 👈 Карточки теперь БЕЛЫЕ и сливаются с фоном
+    surfaceTint = Color.Transparent             // Без розового/фиолетового налёта
 )
 
 @Composable
 fun Learn_androidstudioTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {

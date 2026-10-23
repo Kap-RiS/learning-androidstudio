@@ -1,3 +1,27 @@
 <resources>
-    <string name="app_name">learn_androidstudio</string>
+    <string name="app_name">Learn Android Studio</string>
+    <string name="app_list_title">Каталог приложений</string>
+
+    <!-- Описания иконок и логирование -->
+    <string name="app_logo_desc">Логотип приложения</string>
+    <string name="snackbar_toolbar_clicked">Каталог приложений обновлён</string>
+
+    <!-- Кнопки и иконки -->
+    <string name="action_back">Назад</string>
+    <string name="action_share">Поделиться</string>
+    <string name="btn_install">Установить</string>
+    <string name="btn_download">Скачать</string>
+
+    <!-- Характеристики приложения -->
+    <string name="app_developer">VK Play</string>
+    <string name="app_age_rating">12+</string>
+    <string name="label_age">Возраст</string>
+    <string name="app_size">224 MB</string>
+    <string name="label_size">Размер</string>
+
+    <!-- Секции -->
+    <string name="section_similar_apps">Вам может понравиться</string>
+    <string name="section_screenshots">Скриншоты</string>
+    <string name="section_description">Описание приложения</string>
+    <string name="section_showcase">Витрина</string>
 </resources>

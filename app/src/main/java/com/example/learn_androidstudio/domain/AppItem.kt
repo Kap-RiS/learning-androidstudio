@@ -1,4 +1,5 @@
-package com.example.learn_androidstudio
+package com.example.learn_androidstudio.domain
+
 import androidx.annotation.DrawableRes
 
 //Класс-контейнер для хранения информации о приложениях

@@ -1,6 +1,7 @@
-package com.example.learn_androidstudio
+package com.example.learn_androidstudio.presentation
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -13,19 +14,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.learn_androidstudio.ui.theme.Learn_androidstudioTheme
-
+import com.example.learn_androidstudio.R
+import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppToolbar() {
+fun AppToolbar(
+    onToolbarClick: () -> Unit = {}
+) {
     TopAppBar(
+        modifier = Modifier.clickable { onToolbarClick() },
         title = {
             Text(
-                text = "Список приложений",
+                text = stringResource(R.string.app_list_title),
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold
             )
@@ -33,7 +38,7 @@ fun AppToolbar() {
         navigationIcon = {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "App Logo",
+                contentDescription = stringResource(R.string.app_logo_desc),
                 modifier = Modifier
                     .padding(start = 12.dp, end = 8.dp)
                     .size(36.dp)
@@ -49,7 +54,7 @@ fun AppToolbar() {
 @Preview
 @Composable
 fun AppToolbarPreview() {
-    Learn_androidstudioTheme{
+    Learn_androidstudioTheme {
         AppToolbar()
     }
 }

@@ -29,18 +29,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.learn_androidstudio.R
-import com.example.learn_androidstudio.data.mockAppList
-import com.example.learn_androidstudio.domain.AppItem
+import com.example.learn_androidstudio.domain.model.AppItem
 import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 
 @Composable
 fun AppDetailScreen(
-    app: AppItem = mockAppList.first(),
+    app: AppItem,
+    appList: List<AppItem> = emptyList(),
     onBackClick: () -> Unit = {},
     onShowcaseItemClick: (AppItem) -> Unit = {},
     onSimilarAppClick: (AppItem) -> Unit = {}
 ) {
-    val otherApps = mockAppList.filter { it.id != app.id }
+    val otherApps = appList.filter { it.id != app.id }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -108,7 +108,7 @@ fun AppDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = stringResource(R.string.app_developer),
+                        text = app.developer,
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -117,7 +117,7 @@ fun AppDetailScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = stringResource(R.string.app_age_rating),
+                                text = app.ageRating,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
@@ -129,7 +129,7 @@ fun AppDetailScreen(
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = stringResource(R.string.app_size),
+                                text = app.size,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
@@ -193,7 +193,7 @@ fun AppDetailScreen(
                             .width(260.dp)
                             .height(145.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.background) // Из темы (белый)
+                            .background(MaterialTheme.colorScheme.background)
                     ) {
                         Image(
                             painter = painterResource(id = app.iconRes),
@@ -266,31 +266,40 @@ fun SimilarAppCard(
     onAppClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .width(110.dp)
-            .clickable { onAppClick() },
+        modifier = Modifier.width(110.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = app.iconRes),
-            contentDescription = app.name,
+        // Переход по клику только с картинки и названия
+        Column(
             modifier = Modifier
-                .size(110.dp)
-                .clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop
-        )
+                .fillMaxWidth()
+                .clickable { onAppClick() },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = app.iconRes),
+                contentDescription = app.name,
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = app.name,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 15.sp
+            )
+        }
+
         Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = app.name,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            lineHeight = 15.sp
-        )
-        Spacer(modifier = Modifier.height(6.dp))
+
+        // Кнопка Скачать
         Button(
-            onClick = onAppClick,
+            onClick = { },
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -343,7 +352,7 @@ fun ShowcaseBlock(
                 pageApps.forEach { app ->
                     AppItemCard(
                         app = app,
-                        modifier = Modifier.clickable { onItemClick(app) }
+                        onClick = { onItemClick(app) }
                     )
                 }
             }
@@ -354,9 +363,20 @@ fun ShowcaseBlock(
 @Preview(showBackground = true, heightDp = 1200)
 @Composable
 fun AppDetailScreenPreview() {
+    val sampleApp = AppItem(
+        id = 1,
+        name = "VK",
+        description = "Социальная сеть: общение, сообщества, музыка и видео.",
+        category = "Соцсети",
+        iconRes = R.drawable.ic_vk,
+        developer = "VK.com",
+        ageRating = "12+",
+        size = "145 МБ"
+    )
     Learn_androidstudioTheme {
         AppDetailScreen(
-            app = mockAppList.first(),
+            app = sampleApp,
+            appList = listOf(sampleApp),
             onBackClick = {},
             onShowcaseItemClick = {},
             onSimilarAppClick = {}

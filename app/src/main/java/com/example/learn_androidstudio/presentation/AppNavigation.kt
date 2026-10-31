@@ -6,7 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.learn_androidstudio.data.mockAppList
+import com.example.learn_androidstudio.data.repository.AppRepositoryImpl
+import com.example.learn_androidstudio.domain.repository.AppRepository
 
 object Screen {
     const val APP_LIST = "app_list"
@@ -14,7 +15,9 @@ object Screen {
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    repository: AppRepository = AppRepositoryImpl()
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -34,10 +37,12 @@ fun AppNavigation() {
             arguments = listOf(navArgument("appId") { type = NavType.IntType })
         ) { backStackEntry ->
             val appId = backStackEntry.arguments?.getInt("appId") ?: 1
-            val selectedApp = mockAppList.find { it.id == appId } ?: mockAppList.first()
+            val allApps = repository.getApps()
+            val selectedApp = repository.getAppById(appId) ?: allApps.first()
 
             AppDetailScreen(
                 app = selectedApp,
+                appList = allApps,
                 onBackClick = {
                     navController.popBackStack()
                 },

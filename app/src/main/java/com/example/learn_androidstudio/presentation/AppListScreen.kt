@@ -21,7 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.learn_androidstudio.domain.AppItem
+import com.example.learn_androidstudio.domain.model.AppItem
 import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 import kotlinx.coroutines.flow.collectLatest
 
@@ -63,7 +63,7 @@ fun AppListScreen(
             items(uiState.apps) { app ->
                 AppItemCard(
                     app = app,
-                    modifier = Modifier.clickable { onItemClick(app) }
+                    onClick = { onItemClick(app) }
                 )
             }
         }

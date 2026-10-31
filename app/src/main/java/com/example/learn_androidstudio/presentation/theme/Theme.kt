@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = RuStoreBlue,
+    onPrimary = Color.White,                    // 👈 Текст на primary-элементах (кнопках) — белый
     secondary = PurpleGrey80,
     tertiary = Pink80,
     background = DarkBackground,
@@ -22,10 +23,11 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = RuStoreBlue,
+    onPrimary = Color.White,                    // 👈 Текст на primary-элементах (кнопках) — белый
     secondary = PurpleGrey40,
     tertiary = Pink40,
     background = LightBackground,               // Чистый белый фон (0xFFFFFFFF)
-    surface = LightBackground,                  // 👈 Карточки теперь БЕЛЫЕ и сливаются с фоном
+    surface = LightBackground,                  // Карточки БЕЛЫЕ и сливаются с фоном
     surfaceTint = Color.Transparent             // Без розового/фиолетового налёта
 )
 

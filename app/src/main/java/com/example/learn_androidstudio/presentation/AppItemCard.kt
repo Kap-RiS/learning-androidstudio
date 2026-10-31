@@ -25,23 +25,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.learn_androidstudio.data.mockAppList
-import com.example.learn_androidstudio.domain.AppItem
+import com.example.learn_androidstudio.R
+import com.example.learn_androidstudio.domain.model.AppItem
 import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 
 // карточка одного приложения
 @Composable
 fun AppItemCard(
     app: AppItem,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // 👈 Полностью убирает тень/обводку
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -71,8 +73,7 @@ fun AppItemCard(
                     text = app.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    minLines = 2,
-                    maxLines = 2,
+                    maxLines = 2, // 👈 Убрали minLines = 2
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -96,9 +97,19 @@ fun AppItemCard(
 @Preview(showBackground = true)
 @Composable
 fun AppItemCardPreview() {
+    val sampleApp = AppItem(
+        id = 1,
+        name = "VK",
+        description = "Социальная сеть: общение, сообщества, музыка и видео.",
+        category = "Соцсети",
+        iconRes = R.drawable.ic_vk,
+        developer = "VK.com",
+        ageRating = "12+",
+        size = "145 МБ"
+    )
     Learn_androidstudioTheme {
         Box(modifier = Modifier.padding(16.dp)) {
-            AppItemCard(app = mockAppList[0])
+            AppItemCard(app = sampleApp)
         }
     }
 }

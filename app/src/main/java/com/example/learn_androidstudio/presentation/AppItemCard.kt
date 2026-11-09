@@ -1,42 +1,49 @@
-package com.example.learn_androidstudio
+package com.example.learn_androidstudio.presentation
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.learn_androidstudio.ui.theme.Learn_androidstudioTheme
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.learn_androidstudio.R
+import com.example.learn_androidstudio.domain.model.AppItem
+import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 
-//карточка одного приложения
 @Composable
-fun AppItemCard(app: AppItem) {
+fun AppItemCard(
+    app: AppItem,
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -44,22 +51,30 @@ fun AppItemCard(app: AppItem) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = app.iconRes),
+            AsyncImage(
+                model = app.iconUrl.ifEmpty { app.iconRes },
                 contentDescription = app.name,
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
                 modifier = Modifier
                     .size(54.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp)),
+                contentScale = ContentScale.Crop
             )
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = app.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = app.description,
                     style = MaterialTheme.typography.bodySmall,
@@ -67,7 +82,9 @@ fun AppItemCard(app: AppItem) {
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 Spacer(modifier = Modifier.height(6.dp))
+
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(4.dp)
@@ -88,9 +105,20 @@ fun AppItemCard(app: AppItem) {
 @Preview(showBackground = true)
 @Composable
 fun AppItemCardPreview() {
+    val sampleApp = AppItem(
+        id = "1",
+        name = "VK",
+        description = "Социальная сеть: общение, сообщества, музыка и видео.",
+        category = "Соцсети",
+        iconUrl = "",
+        iconRes = R.drawable.ic_launcher_foreground,
+        developer = "VK.com",
+        ageRating = "12+",
+        size = "145 МБ"
+    )
     Learn_androidstudioTheme {
-        Box(modifier = Modifier.padding(16.dp)){
-            AppItemCard(app = mockAppList[0])
+        Box(modifier = Modifier.padding(16.dp)) {
+            AppItemCard(app = sampleApp)
         }
     }
 }

@@ -1,44 +1,33 @@
 package com.example.learn_androidstudio.presentation
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.learn_androidstudio.domain.model.AppItem
-import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AppListScreen(
-    viewModel: AppListViewModel = viewModel(),
-    onItemClick: (AppItem) -> Unit = {}
+    viewModel: AppListViewModel,
+    uiState: AppListUiState,
+    onItemClick: (AppItem) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        viewModel.eventFlow.collectLatest { uiText ->
-            // Передаем applicationContext — это убирает предупреждение Линта
-            val message = uiText.asString(context.applicationContext)
-            snackbarHostState.showSnackbar(message)
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            snackbarHostState.showSnackbar(
+                message = event.asString(context.applicationContext)
+            )
         }
     }
 
@@ -48,32 +37,31 @@ fun AppListScreen(
                 onToolbarClick = { viewModel.onToolbarClick() }
             )
         },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-        containerColor = MaterialTheme.colorScheme.background
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(innerPadding)
         ) {
-            items(uiState.apps) { app ->
-                AppItemCard(
-                    app = app,
-                    onClick = { onItemClick(app) }
+            if (uiState.isLoading) {
+                // Показываем индикатор загрузки, пока идет сетевой запрос
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
                 )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(uiState.apps) { app ->
+                        AppItemCard(
+                            app = app,
+                            onClick = { onItemClick(app) }
+                        )
+                    }
+                }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppListScreenPreview() {
-    Learn_androidstudioTheme {
-        AppListScreen(onItemClick = {})
     }
 }

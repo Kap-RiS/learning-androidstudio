@@ -1,6 +1,5 @@
 package com.example.learn_androidstudio.presentation
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,16 +19,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.learn_androidstudio.R
 import com.example.learn_androidstudio.domain.model.AppItem
 import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
 
-// карточка одного приложения
 @Composable
 fun AppItemCard(
     app: AppItem,
@@ -51,14 +51,19 @@ fun AppItemCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = app.iconRes),
+            AsyncImage(
+                model = app.iconUrl.ifEmpty { app.iconRes },
                 contentDescription = app.name,
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
                 modifier = Modifier
                     .size(54.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp)),
+                contentScale = ContentScale.Crop
             )
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = app.name,
@@ -69,14 +74,17 @@ fun AppItemCard(
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = app.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2, // 👈 Убрали minLines = 2
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 Spacer(modifier = Modifier.height(6.dp))
+
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(4.dp)
@@ -98,11 +106,12 @@ fun AppItemCard(
 @Composable
 fun AppItemCardPreview() {
     val sampleApp = AppItem(
-        id = 1,
+        id = "1",
         name = "VK",
         description = "Социальная сеть: общение, сообщества, музыка и видео.",
         category = "Соцсети",
-        iconRes = R.drawable.ic_vk,
+        iconUrl = "",
+        iconRes = R.drawable.ic_launcher_foreground,
         developer = "VK.com",
         ageRating = "12+",
         size = "145 МБ"

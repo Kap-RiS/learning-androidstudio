@@ -1,14 +1,29 @@
 package com.example.learn_androidstudio.data.dto
 
-import androidx.annotation.DrawableRes
+import com.google.gson.annotations.SerializedName
 
 data class AppItemDto(
-    val id: Int,
-    val title: String,
-    val subtitle: String,
-    val categoryName: String,
-    @DrawableRes val icon: Int,
-    val developer: String, // Новый параметр: разработчик
-    val ageRating: String, // Новый параметр: возрастное ограничение (напр. "12+")
-    val size: String       // Новый параметр: размер (напр. "145 МБ")
+    @SerializedName("id")
+    val id: String? = null,
+
+    @SerializedName("name", alternate = ["title"])
+    val name: String? = null,
+
+    @SerializedName("description", alternate = ["subtitle"])
+    val description: String? = null,
+
+    @SerializedName("category", alternate = ["categoryName"])
+    val category: String? = null,
+
+    @SerializedName("icon", alternate = ["iconUrl"])
+    val iconUrl: String? = null,
+
+    @SerializedName("developer")
+    val developer: String? = null,
+
+    @SerializedName("ageRating", alternate = ["age_rating"])
+    val ageRating: String? = null,
+
+    @SerializedName("size")
+    val size: String? = null
 )

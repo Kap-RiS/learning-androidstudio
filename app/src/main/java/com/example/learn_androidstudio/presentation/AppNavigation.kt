@@ -1,58 +1,58 @@
 package com.example.learn_androidstudio.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.learn_androidstudio.data.repository.AppRepositoryImpl
-import com.example.learn_androidstudio.domain.repository.AppRepository
-
-object Screen {
-    const val APP_LIST = "app_list"
-    const val APP_DETAIL = "app_detail"
-}
 
 @Composable
 fun AppNavigation(
-    repository: AppRepository = AppRepositoryImpl()
+    viewModel: AppListViewModel = viewModel()
 ) {
     val navController = rememberNavController()
+    val uiState by viewModel.uiState.collectAsState()
 
     NavHost(
         navController = navController,
-        startDestination = Screen.APP_LIST
+        startDestination = "app_list"
     ) {
-        composable(Screen.APP_LIST) {
+        composable("app_list") {
             AppListScreen(
-                onItemClick = { clickedApp ->
-                    navController.navigate("${Screen.APP_DETAIL}/${clickedApp.id}")
+                viewModel = viewModel,
+                uiState = uiState,
+                onItemClick = { app ->
+                    navController.navigate("app_detail/${app.id}")
                 }
             )
         }
 
         composable(
-            route = "${Screen.APP_DETAIL}/{appId}",
-            arguments = listOf(navArgument("appId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val appId = backStackEntry.arguments?.getInt("appId") ?: 1
-            val allApps = repository.getApps()
-            val selectedApp = repository.getAppById(appId) ?: allApps.first()
-
-            AppDetailScreen(
-                app = selectedApp,
-                appList = allApps,
-                onBackClick = {
-                    navController.popBackStack()
-                },
-                onShowcaseItemClick = { showcaseApp ->
-                    navController.navigate("${Screen.APP_DETAIL}/${showcaseApp.id}")
-                },
-                onSimilarAppClick = { similarApp ->
-                    navController.navigate("${Screen.APP_DETAIL}/${similarApp.id}")
-                }
+            route = "app_detail/{appId}",
+            arguments = listOf(
+                navArgument("appId") { type = NavType.StringType }
             )
+        ) { backStackEntry ->
+            val appId = backStackEntry.arguments?.getString("appId") ?: return@composable
+            val selectedApp = uiState.apps.find { it.id == appId }
+
+            if (selectedApp != null) {
+                AppDetailScreen(
+                    app = selectedApp,
+                    appList = uiState.apps,
+                    onBackClick = { navController.popBackStack() },
+                    onShowcaseItemClick = { app ->
+                        navController.navigate("app_detail/${app.id}")
+                    },
+                    onSimilarAppClick = { app ->
+                        navController.navigate("app_detail/${app.id}")
+                    }
+                )
+            }
         }
     }
 }

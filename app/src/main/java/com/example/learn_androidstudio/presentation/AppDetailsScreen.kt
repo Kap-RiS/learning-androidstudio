@@ -1,10 +1,20 @@
 package com.example.learn_androidstudio.presentation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -15,7 +25,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.learn_androidstudio.R
 import com.example.learn_androidstudio.domain.model.AppItem
 import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
@@ -81,9 +98,11 @@ fun AppDetailScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.Top
             ) {
-                Image(
-                    painter = painterResource(id = app.iconRes),
+                AsyncImage(
+                    model = app.iconUrl.ifEmpty { app.iconRes },
                     contentDescription = app.name,
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
                     modifier = Modifier
                         .size(110.dp)
                         .clip(RoundedCornerShape(22.dp)),
@@ -193,11 +212,13 @@ fun AppDetailScreen(
                             .width(260.dp)
                             .height(145.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                     ) {
-                        Image(
-                            painter = painterResource(id = app.iconRes),
+                        AsyncImage(
+                            model = app.iconUrl.ifEmpty { app.iconRes },
                             contentDescription = null,
+                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                            error = painterResource(id = R.drawable.ic_launcher_foreground),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
@@ -269,16 +290,18 @@ fun SimilarAppCard(
         modifier = Modifier.width(110.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Переход по клику только с картинки и названия
+        // Клик только по иконке и названию — кнопка «Скачать» отдельно
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onAppClick() },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = app.iconRes),
+            AsyncImage(
+                model = app.iconUrl.ifEmpty { app.iconRes },
                 contentDescription = app.name,
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
                 modifier = Modifier
                     .size(110.dp)
                     .clip(RoundedCornerShape(16.dp)),
@@ -297,9 +320,8 @@ fun SimilarAppCard(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        // Кнопка Скачать
         Button(
-            onClick = { },
+            onClick = { /* Пока ничего не делаем */ },
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -364,11 +386,12 @@ fun ShowcaseBlock(
 @Composable
 fun AppDetailScreenPreview() {
     val sampleApp = AppItem(
-        id = 1,
+        id = "1",
         name = "VK",
         description = "Социальная сеть: общение, сообщества, музыка и видео.",
         category = "Соцсети",
-        iconRes = R.drawable.ic_vk,
+        iconUrl = "",
+        iconRes = R.drawable.ic_launcher_foreground,
         developer = "VK.com",
         ageRating = "12+",
         size = "145 МБ"

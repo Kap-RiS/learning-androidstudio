@@ -6,7 +6,7 @@ import com.example.learn_androidstudio.domain.repository.AppRepository
 class GetAppsUseCase(
     private val repository: AppRepository
 ) {
-    operator fun invoke(): List<AppItem> {
+    suspend operator fun invoke(): List<AppItem> {
         return repository.getApps()
     }
 }

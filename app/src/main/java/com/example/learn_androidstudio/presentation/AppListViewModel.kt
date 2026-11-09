@@ -23,7 +23,7 @@ class AppListViewModel(
     private val getAppsUseCase: GetAppsUseCase = GetAppsUseCase(AppRepositoryImpl())
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AppListUiState())
+    private val _uiState = MutableStateFlow(AppListUiState(isLoading = true))
     val uiState: StateFlow<AppListUiState> = _uiState.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<UiText>()
@@ -33,13 +33,15 @@ class AppListViewModel(
         loadApps()
     }
 
-    private fun loadApps() {
-        // Данные приходят через Clean Architecture: UseCase -> Repository -> Mapper -> DTO
-        val apps = getAppsUseCase()
-        _uiState.value = AppListUiState(
-            apps = apps,
-            isLoading = false
-        )
+    fun loadApps() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val apps = getAppsUseCase()
+            _uiState.value = AppListUiState(
+                apps = apps,
+                isLoading = false
+            )
+        }
     }
 
     fun onToolbarClick() {

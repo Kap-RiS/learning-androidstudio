@@ -2,25 +2,27 @@ package com.example.learn_androidstudio.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.learn_androidstudio.R
-import com.example.learn_androidstudio.data.repository.AppRepositoryImpl
 import com.example.learn_androidstudio.domain.model.AppItem
 import com.example.learn_androidstudio.domain.usecase.GetAppsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class AppListUiState(
-    val apps: List<AppItem> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val apps: List<AppItem> = emptyList()
 )
 
-class AppListViewModel(
-    private val getAppsUseCase: GetAppsUseCase = GetAppsUseCase(AppRepositoryImpl())
+@HiltViewModel
+class AppListViewModel @Inject constructor(
+    private val getAppsUseCase: GetAppsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AppListUiState(isLoading = true))
@@ -35,18 +37,25 @@ class AppListViewModel(
 
     fun loadApps() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            val apps = getAppsUseCase()
-            _uiState.value = AppListUiState(
-                apps = apps,
-                isLoading = false
-            )
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val apps = getAppsUseCase()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        apps = apps
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false) }
+                _eventFlow.emit(UiText.DynamicString(e.message ?: "Ошибка загрузки"))
+            }
         }
     }
 
     fun onToolbarClick() {
         viewModelScope.launch {
-            _eventFlow.emit(UiText.StringResource(R.string.snackbar_toolbar_clicked))
+            _eventFlow.emit(UiText.DynamicString("Поиск пока в разработке"))
         }
     }
 }

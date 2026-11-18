@@ -3,7 +3,7 @@ package com.example.learn_androidstudio.presentation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel // <-- заменили импорт
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,7 +12,7 @@ import androidx.navigation.navArgument
 
 @Composable
 fun AppNavigation(
-    viewModel: AppListViewModel = viewModel()
+    viewModel: AppListViewModel = hiltViewModel() // <-- теперь ViewModel внедряется через Hilt
 ) {
     val navController = rememberNavController()
     val uiState by viewModel.uiState.collectAsState()

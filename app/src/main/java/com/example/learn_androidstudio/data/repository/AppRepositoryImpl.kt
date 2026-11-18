@@ -1,39 +1,35 @@
 package com.example.learn_androidstudio.data.repository
 
-import android.util.Log
 import com.example.learn_androidstudio.data.api.AppApiService
-import com.example.learn_androidstudio.data.api.RetrofitClient
-import com.example.learn_androidstudio.data.mapper.toDomain
+import com.example.learn_androidstudio.data.mapper.AppItemMapper
 import com.example.learn_androidstudio.data.source.MockAppDataSource
 import com.example.learn_androidstudio.domain.model.AppItem
 import com.example.learn_androidstudio.domain.repository.AppRepository
+import javax.inject.Inject
 
-class AppRepositoryImpl(
-    private val apiService: AppApiService = RetrofitClient.apiService
+class AppRepositoryImpl @Inject constructor(
+    private val apiService: AppApiService,
+    private val mapper: AppItemMapper
 ) : AppRepository {
 
-    override suspend fun getApps(): List<AppItem> {
+    override suspend fun getCatalog(): List<AppItem> {
         return try {
-            val remoteApps = apiService.getCatalog().toDomain()
-            if (remoteApps.isNotEmpty()) {
-                Log.d("AppRepository", "Успешно получено ${remoteApps.size} приложений с сервера")
-                remoteApps
-            } else {
-                Log.w("AppRepository", "Сервер вернул пустой список, используем мок-данные")
-                MockAppDataSource.getAppDtos().toDomain()
-            }
+            val dtoList = apiService.getCatalog()
+            dtoList.map { mapper.mapDtoToDomain(it) }
         } catch (e: Exception) {
-            Log.e("AppRepository", "Ошибка сетевого запроса каталога: ${e.message}", e)
-            MockAppDataSource.getAppDtos().toDomain()
+            MockAppDataSource.getAppDtos().map { mapper.mapDtoToDomain(it) }
         }
     }
 
-    override suspend fun getAppById(id: String): AppItem? {
+    override suspend fun getAppDetail(id: String): AppItem {
         return try {
-            apiService.getAppDetail(id).toDomain()
+            val dto = apiService.getAppDetail(id)
+            mapper.mapDtoToDomain(dto)
         } catch (e: Exception) {
-            Log.e("AppRepository", "Ошибка сетевого запроса деталей для id=$id: ${e.message}", e)
-            getApps().find { it.id == id }
+            MockAppDataSource.getAppDtos()
+                .find { it.id == id }
+                ?.let { mapper.mapDtoToDomain(it) }
+                ?: throw e
         }
     }
 }

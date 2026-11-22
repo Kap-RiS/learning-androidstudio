@@ -1,23 +1,42 @@
+// app/src/main/java/com/example/learn_androidstudio/data/mapper/AppItemMapper.kt
 package com.example.learn_androidstudio.data.mapper
 
-import com.example.learn_androidstudio.R
 import com.example.learn_androidstudio.data.dto.AppItemDto
 import com.example.learn_androidstudio.domain.model.AppItem
+import javax.inject.Inject
 
-fun AppItemDto.toDomain(): AppItem {
-    return AppItem(
-        id = id.orEmpty(), // Превращает String? в String (если null, будет пустая строка)
-        name = name.orEmpty(),
-        description = description.orEmpty(),
-        category = category ?: "Разное",
-        iconUrl = iconUrl.orEmpty(),
-        iconRes = R.drawable.ic_launcher_foreground,
-        developer = developer ?: "Неизвестный разработчик",
-        ageRating = ageRating ?: "0+",
-        size = size ?: "0 МБ"
-    )
-}
+class AppItemMapper @Inject constructor() {
 
-fun List<AppItemDto>.toDomain(): List<AppItem> {
-    return map { it.toDomain() }
+    fun mapDtoToDomain(dto: AppItemDto): AppItem {
+        val rawIcon = dto.iconUrl.orEmpty()
+        val fullIconUrl = if (rawIcon.startsWith("/")) {
+            "http://185.103.109.134$rawIcon"
+        } else {
+            rawIcon
+        }
+
+        return AppItem(
+            id = dto.id.orEmpty(),
+            name = dto.name.orEmpty(),
+            description = dto.description.orEmpty(),
+            category = dto.category.orEmpty(),
+            iconUrl = fullIconUrl,
+            developer = dto.developer.takeUnless { it.isNullOrBlank() } ?: "VK Team",
+            ageRating = dto.ageRating.takeUnless { it.isNullOrBlank() } ?: "12+",
+            size = dto.size.takeUnless { it.isNullOrBlank() } ?: "95 МБ"
+        )
+    }
+
+    fun mapDomainToDto(domain: AppItem): AppItemDto {
+        return AppItemDto(
+            id = domain.id,
+            name = domain.name,
+            description = domain.description,
+            category = domain.category,
+            iconUrl = domain.iconUrl,
+            developer = domain.developer,
+            ageRating = domain.ageRating,
+            size = domain.size
+        )
+    }
 }

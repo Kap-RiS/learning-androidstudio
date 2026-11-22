@@ -25,14 +25,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,136 +45,290 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.learn_androidstudio.R
 import com.example.learn_androidstudio.domain.model.AppItem
-import com.example.learn_androidstudio.presentation.theme.Learn_androidstudioTheme
+import java.util.Locale
 
 @Composable
 fun AppDetailScreen(
-    app: AppItem,
-    appList: List<AppItem> = emptyList(),
     onBackClick: () -> Unit = {},
     onShowcaseItemClick: (AppItem) -> Unit = {},
-    onSimilarAppClick: (AppItem) -> Unit = {}
+    onSimilarAppClick: (AppItem) -> Unit = {},
+    viewModel: AppDetailViewModel = hiltViewModel()
 ) {
-    val otherApps = appList.filter { it.id != app.id }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 24.dp)
         ) {
-            // ===== 1. ВЕРХНЯЯ ПАНЕЛЬ =====
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.action_back),
-                        tint = MaterialTheme.colorScheme.primary
+            when (val state = uiState) {
+                is AppDetailUiState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = stringResource(R.string.action_share),
-                        tint = MaterialTheme.colorScheme.primary
+                is AppDetailUiState.Error -> {
+                    Text(
+                        text = state.message.asString(),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                is AppDetailUiState.Content -> {
+                    AppDetailContent(
+                        content = state,
+                        onBackClick = onBackClick,
+                        onInstallClick = viewModel::onInstallClick,
+                        onSimilarDownloadClick = viewModel::onSimilarAppDownloadClick,
+                        onShowcaseItemClick = onShowcaseItemClick,
+                        onSimilarAppClick = onSimilarAppClick
                     )
                 }
             }
+        }
+    }
+}
 
-            // ===== 2. ШАПКА ПРИЛОЖЕНИЯ =====
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                AsyncImage(
-                    model = app.iconUrl.ifEmpty { app.iconRes },
-                    contentDescription = app.name,
-                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                    modifier = Modifier
-                        .size(110.dp)
-                        .clip(RoundedCornerShape(22.dp)),
-                    contentScale = ContentScale.Crop
+@Composable
+fun AppDetailContent(
+    content: AppDetailUiState.Content,
+    onBackClick: () -> Unit,
+    onInstallClick: () -> Unit,
+    onSimilarDownloadClick: (String) -> Unit,
+    onShowcaseItemClick: (AppItem) -> Unit,
+    onSimilarAppClick: (AppItem) -> Unit
+) {
+    val app = content.app
+    val otherApps = content.allApps.filter { it.id != app.id }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 24.dp)
+    ) {
+        // 1. Верхняя панель
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.action_back),
+                    tint = MaterialTheme.colorScheme.primary
                 )
+            }
+            IconButton(onClick = { }) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = stringResource(R.string.action_share),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
 
-                Spacer(modifier = Modifier.width(16.dp))
+        // 2. Шапка приложения с тремя характеристиками (Возраст, Размер, Рейтинг)
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            AsyncImage(
+                model = app.iconUrl.ifEmpty { app.iconRes },
+                contentDescription = stringResource(R.string.app_logo_desc),
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(RoundedCornerShape(22.dp)),
+                contentScale = ContentScale.Crop
+            )
 
-                Column {
-                    Text(
-                        text = app.category,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = app.name,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = app.developer,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column {
+                Text(
+                    text = app.category,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = app.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = app.developer,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Возраст, Размер и Рейтинг
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = app.ageRating,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = stringResource(R.string.label_age),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = app.size,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = stringResource(R.string.label_size),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
                             Text(
-                                text = app.ageRating,
+                                text = if (app.rating != null) String.format(Locale.getDefault(), "%.1f", app.rating) else "—",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
-                            Text(
-                                text = stringResource(R.string.label_age),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = app.size,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = stringResource(R.string.label_size),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        Text(
+                            text = stringResource(R.string.label_rating),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-            // ===== 3. КНОПКА «УСТАНОВИТЬ» =====
+        // 3. Кнопка «Установить» / «Отменить» / «Открыть»
+        InstallButton(
+            installState = content.installState,
+            onClick = onInstallClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 4. Блок «Вам может понравиться» с работающими кнопками скачивания
+        if (otherApps.isNotEmpty()) {
+            SimilarAppsBlock(
+                apps = otherApps.take(6),
+                similarInstallStates = content.similarInstallStates,
+                onAppClick = onSimilarAppClick,
+                onDownloadClick = onSimilarDownloadClick
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // 5. Блок «Скриншоты»
+        Text(
+            text = stringResource(R.string.section_screenshots),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(3) {
+                Box(
+                    modifier = Modifier
+                        .width(260.dp)
+                        .height(145.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    AsyncImage(
+                        model = app.iconUrl.ifEmpty { app.iconRes },
+                        contentDescription = null,
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 6. Описание
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Text(
+                text = stringResource(R.string.section_description),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = app.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 7. Витрина
+        if (otherApps.isNotEmpty()) {
+            ShowcaseBlock(
+                showcaseApps = otherApps.take(9),
+                onItemClick = onShowcaseItemClick
+            )
+        }
+    }
+}
+
+@Composable
+fun InstallButton(
+    installState: InstallState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (installState) {
+        is InstallState.NotInstalled -> {
             Button(
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(48.dp),
+                onClick = onClick,
+                modifier = modifier.height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -183,73 +341,39 @@ fun AppDetailScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ===== 4. БЛОК «ВАМ МОЖЕТ ПОНРАВИТЬСЯ» =====
-            SimilarAppsBlock(
-                apps = otherApps.take(6),
-                onAppClick = onSimilarAppClick
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ===== 5. БЛОК «СКРИНШОТЫ» =====
-            Text(
-                text = stringResource(R.string.section_screenshots),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+        }
+        is InstallState.Installing -> {
+            OutlinedButton(
+                onClick = onClick,
+                modifier = modifier.height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
             ) {
-                items(3) {
-                    Box(
-                        modifier = Modifier
-                            .width(260.dp)
-                            .height(145.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                    ) {
-                        AsyncImage(
-                            model = app.iconUrl.ifEmpty { app.iconRes },
-                            contentDescription = null,
-                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                            error = painterResource(id = R.drawable.ic_launcher_foreground),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ===== 6. БЛОК «ОПИСАНИЕ ПРИЛОЖЕНИЯ» =====
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text(
-                    text = stringResource(R.string.section_description),
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(R.string.btn_cancel_progress, installState.progress),
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+        is InstallState.Installed -> {
+            Button(
+                onClick = onClick,
+                modifier = modifier.height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
                 Text(
-                    text = app.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = stringResource(R.string.btn_open),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // ===== 7. БЛОК «ВИТРИНА» =====
-            ShowcaseBlock(
-                showcaseApps = otherApps.take(9),
-                onItemClick = onShowcaseItemClick
-            )
         }
     }
 }
@@ -257,7 +381,9 @@ fun AppDetailScreen(
 @Composable
 fun SimilarAppsBlock(
     apps: List<AppItem>,
-    onAppClick: (AppItem) -> Unit
+    similarInstallStates: Map<String, InstallState>,
+    onAppClick: (AppItem) -> Unit,
+    onDownloadClick: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -271,10 +397,12 @@ fun SimilarAppsBlock(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(apps) { item ->
+            items(apps, key = { it.id }) { item ->
                 SimilarAppCard(
                     app = item,
-                    onAppClick = { onAppClick(item) }
+                    installState = similarInstallStates[item.id] ?: InstallState.NotInstalled,
+                    onAppClick = { onAppClick(item) },
+                    onDownloadClick = { onDownloadClick(item.id) }
                 )
             }
         }
@@ -284,13 +412,15 @@ fun SimilarAppsBlock(
 @Composable
 fun SimilarAppCard(
     app: AppItem,
-    onAppClick: () -> Unit
+    installState: InstallState,
+    onAppClick: () -> Unit,
+    onDownloadClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.width(110.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Клик только по иконке и названию — кнопка «Скачать» отдельно
+        // Клик только по иконке и названию вызывает переход
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -320,23 +450,67 @@ fun SimilarAppCard(
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        Button(
-            onClick = { /* Пока ничего не делаем */ },
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            contentPadding = PaddingValues(vertical = 0.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(30.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.btn_download),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-            )
+        // Кнопка Скачать / Прогресс / Открыть
+        when (installState) {
+            is InstallState.NotInstalled -> {
+                Button(
+                    onClick = onDownloadClick,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    contentPadding = PaddingValues(vertical = 0.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_download),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            is InstallState.Installing -> {
+                OutlinedButton(
+                    onClick = onDownloadClick,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    contentPadding = PaddingValues(vertical = 0.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp)
+                ) {
+                    Text(
+                        text = "${installState.progress}%",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            is InstallState.Installed -> {
+                Button(
+                    onClick = onDownloadClick,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    contentPadding = PaddingValues(vertical = 0.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_open),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }
@@ -379,30 +553,5 @@ fun ShowcaseBlock(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, heightDp = 1200)
-@Composable
-fun AppDetailScreenPreview() {
-    val sampleApp = AppItem(
-        id = "1",
-        name = "VK",
-        description = "Социальная сеть: общение, сообщества, музыка и видео.",
-        category = "Соцсети",
-        iconUrl = "",
-        iconRes = R.drawable.ic_launcher_foreground,
-        developer = "VK.com",
-        ageRating = "12+",
-        size = "145 МБ"
-    )
-    Learn_androidstudioTheme {
-        AppDetailScreen(
-            app = sampleApp,
-            appList = listOf(sampleApp),
-            onBackClick = {},
-            onShowcaseItemClick = {},
-            onSimilarAppClick = {}
-        )
     }
 }

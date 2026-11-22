@@ -11,5 +11,6 @@ data class AppItem(
     @DrawableRes val iconRes: Int = 0,
     val developer: String,
     val ageRating: String,
-    val size: String
+    val size: String,
+    val rating: Float? = null
 )
